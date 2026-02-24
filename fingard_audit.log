@@ -1,0 +1,39 @@
+2026-02-24 13:03:44,752 - fastapi - ERROR - Form data requires "python-multipart" to be installed. 
+You can install "python-multipart" with: 
+
+pip install python-multipart
+
+2026-02-24 13:06:20,476 - fastapi_endpoint - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 13:06:20,477 - FinGuardOrchestrator - INFO - Starting FinGuard analysis - Session: SESSION_20260224130620477256
+2026-02-24 13:06:20,477 - FinGuardOrchestrator - INFO - Mode: COMMAND, Media Type: text
+2026-02-24 13:06:20,477 - FinGuardOrchestrator - INFO - === STAGE 1: Fraud Analysis ===
+2026-02-24 13:06:20,477 - FraudAgent - INFO - Starting fraud analysis for text
+2026-02-24 13:06:20,477 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Fraud Detection Analysis for FinGuard
+===========...
+2026-02-24 13:06:20,478 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 13:06:20,478 - FraudAgent - INFO - Plan captured successfully
+2026-02-24 13:06:20,478 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 13:06:26,228 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 13:06:26,252 - armoriq_sdk.client - INFO - Intent token issued: id=b6856dd1bd39493e822afe0f08da4070, plan_hash=87dca151b0a8ae38..., expires=3600.0s
+2026-02-24 13:06:26,253 - FraudAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 13:06:26,253 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=fraud-mcp, action=detect_deepfakes
+2026-02-24 13:06:26,253 - armoriq_sdk.client - ERROR - MCP invocation error: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
+2026-02-24 13:06:26,253 - FraudAgent - ERROR - Action invocation failed: MCP invocation failed: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
+2026-02-24 13:06:26,253 - root - ERROR - [FraudAgent] ANALYSIS_FAILED: MCP invocation failed: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
+2026-02-24 13:06:26,253 - FinGuardOrchestrator - INFO - === STAGE 4: Audit Trail Finalization ===
+2026-02-24 13:06:26,253 - MemoryUpdateAgent - INFO - Starting memory update and audit trail finalization
+2026-02-24 13:06:26,253 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Memory Update and Audit Trail Finalization
+======...
+2026-02-24 13:06:26,253 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 13:06:26,253 - MemoryUpdateAgent - INFO - Plan captured successfully
+2026-02-24 13:06:26,253 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 13:06:26,997 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 13:06:27,009 - armoriq_sdk.client - INFO - Intent token issued: id=74acc3f8bee64b3c805fe4023ae9c0ff, plan_hash=090352644343d37d..., expires=3600.0s
+2026-02-24 13:06:27,009 - MemoryUpdateAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 13:06:27,009 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=memory-mcp, action=consolidate_findings
+2026-02-24 13:06:27,010 - armoriq_sdk.client - ERROR - MCP invocation error: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
+2026-02-24 13:06:27,010 - MemoryUpdateAgent - ERROR - Action invocation failed: MCP invocation failed: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
+2026-02-24 13:06:27,010 - root - ERROR - [MemoryUpdateAgent] FINALIZATION_FAILED: MCP invocation failed: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
+2026-02-24 13:06:27,010 - FinGuardOrchestrator - INFO - FinGuard analysis complete. Final Decision: REQUIRE_MANUAL_REVIEW

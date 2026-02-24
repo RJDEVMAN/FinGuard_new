@@ -1,0 +1,9 @@
+# Ignore venv
+code_warriors/
+
+# Ignore __pycache__
+__pycache__/
+
+# Ignore dot environment files
+.env
+

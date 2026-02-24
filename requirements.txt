@@ -1,0 +1,9 @@
+fastapi
+numpy
+pandas
+armoriq-sdk
+streamlit
+python-dotenv
+uvicorn
+pytest
+httpx

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Analysis - FinGuard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>FinGuard</span>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="analysis.html">Text Analysis</a></li>
+                <li><a href="media-analysis.html">Media Analysis</a></li>
+                <li><a href="batch-analysis.html" class="active">Batch Processing</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li id="status-indicator" class="status-indicator offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Offline</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Batch Analysis</h1>
+            <p>Analyze multiple text items in a single batch operation</p>
+        </div>
+
+        <!-- Analysis Form -->
+        <div class="analysis-form-wrapper">
+            <div class="form-card">
+                <form id="batch-form">
+                    <div class="form-group">
+                        <label for="batch-input">
+                            <strong>Enter Text Items (One per line)</strong>
+                            <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="batch-input" 
+                            name="batch_content" 
+                            placeholder="Enter each item on a new line...&#10;Example:&#10;Transfer funds urgently&#10;Verify account immediately&#10;Click link to claim reward"
+                            rows="10"
+                            required></textarea>
+                        <div class="batch-info">
+                            <span id="item-count">0</span> items
+                            <span class="divider">•</span>
+                            <span id="line-count">0</span> lines
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="batch-mode">
+                            <strong>Execution Mode</strong>
+                        </label>
+                        <select id="batch-mode" name="mode">
+                            <option value="COMMAND">Command (Automatic)</option>
+                            <option value="ASK">Ask (With Confirmation)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-layer-group"></i> Process Batch
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="batch-loading" class="loading-overlay hidden">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Processing batch...</p>
+                <div class="progress-bar">
+                    <div id="batch-progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="batch-results" class="results-section hidden">
+            <!-- Summary -->
+            <div class="batch-summary">
+                <h2>Batch Processing Results</h2>
+                <div class="summary-stats">
+                    <div class="stat">
+                        <span class="label">Total Items:</span>
+                        <span class="value" id="total-items">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Completed:</span>
+                        <span class="value" id="completed-items">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Flagged:</span>
+                        <span class="value" id="flagged-items">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Processing Time:</span>
+                        <span class="value" id="processing-time">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="batch-results-table">
+                <h3>Individual Results</h3>
+                <div class="table-container">
+                    <table id="results-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Content</th>
+                                <th>Decision</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody">
+                            <!-- Will be populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="result-actions">
+                <button id="export-batch-btn" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Export Results
+                </button>
+                <button id="new-batch-btn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Batch
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="batch-error" class="error-message hidden">
+            <div class="error-content">
+                <i class="fas fa-exclamation-circle"></i>
+                <p id="batch-error-text">An error occurred</p>
+                <button class="btn btn-small" onclick="document.getElementById('batch-error').classList.add('hidden')">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 FinGuard. All rights reserved.</p>
+            <p>Version 1.0.0 | Powered by ArmorIQ</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        const batchInput = document.getElementById('batch-input');
+        const itemCount = document.getElementById('item-count');
+        const lineCount = document.getElementById('line-count');
+
+        batchInput.addEventListener('input', function() {
+            const lines = this.value.trim().split('\n').filter(line => line.trim().length > 0);
+            itemCount.textContent = lines.length;
+            lineCount.textContent = this.value.split('\n').length;
+        });
+
+        document.getElementById('batch-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const text = batchInput.value.trim();
+            if (!text) {
+                showBatchError('Please enter at least one item');
+                return;
+            }
+
+            const items = text.split('\n').filter(line => line.trim().length > 0);
+            if (items.length === 0) {
+                showBatchError('No valid items to process');
+                return;
+            }
+
+            try {
+                showBatchLoading(true);
+                document.getElementById('batch-results').classList.add('hidden');
+
+                const startTime = Date.now();
+                const results = await API.analyzeBatch({
+                    items: items,
+                    mode: document.getElementById('batch-mode').value
+                });
+
+                const endTime = Date.now();
+                const processingTime = ((endTime - startTime) / 1000).toFixed(2);
+
+                displayBatchResults(results, items, processingTime);
+                showBatchLoading(false);
+                document.getElementById('batch-results').classList.remove('hidden');
+            } catch (error) {
+                console.error('Batch analysis error:', error);
+                showBatchError(error.message || 'Failed to process batch');
+                showBatchLoading(false);
+            }
+        });
+
+        function displayBatchResults(results, items, processingTime) {
+            const tbody = document.getElementById('results-tbody');
+            tbody.innerHTML = '';
+
+            let flaggedCount = 0;
+
+            results.forEach((result, index) => {
+                const row = document.createElement('tr');
+                const decision = result.decision || 'UNKNOWN';
+                
+                if (decision.includes('FRAUD') || decision.includes('CHECK') || decision.includes('BLOCK')) {
+                    flaggedCount++;
+                }
+
+                const contentPreview = items[index].substring(0, 50) + (items[index].length > 50 ? '...' : '');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="content-cell" title="${items[index]}">${contentPreview}</td>
+                    <td>
+                        <span class="decision-badge ${decision.toLowerCase().replace(/_/g, '-')}">
+                            ${decision}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge success">Completed</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-small" onclick="viewBatchDetail(${index}, '${items[index]}')">
+                            View
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('total-items').textContent = items.length;
+            document.getElementById('completed-items').textContent = results.length;
+            document.getElementById('flagged-items').textContent = flaggedCount;
+            document.getElementById('processing-time').textContent = processingTime + 's';
+        }
+
+        function viewBatchDetail(index, content) {
+            alert('Item ' + (index + 1) + ':\n\n' + content);
+        }
+
+        function showBatchLoading(show) {
+            document.getElementById('batch-loading').classList.toggle('hidden', !show);
+        }
+
+        function showBatchError(message) {
+            const errorDiv = document.getElementById('batch-error');
+            document.getElementById('batch-error-text').textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        document.getElementById('export-batch-btn').addEventListener('click', function() {
+            const table = document.getElementById('results-table');
+            let csv = 'Index,Content,Decision,Status\n';
+            
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                const index_col = cells[0].textContent;
+                const content = cells[1].textContent;
+                const decision = cells[2].textContent;
+                const status = cells[3].textContent;
+                csv += `"${index + 1}","${content}","${decision}","${status}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'batch_results.csv';
+            a.click();
+        });
+
+        document.getElementById('new-batch-btn').addEventListener('click', function() {
+            document.getElementById('batch-form').reset();
+            document.getElementById('batch-results').classList.add('hidden');
+            itemCount.textContent = '0';
+            lineCount.textContent = '0';
+            batchInput.focus();
+        });
+    </script>
+</body>
+</html>

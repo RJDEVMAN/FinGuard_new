@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analysis - FinGuard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>FinGuard</span>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="analysis.html" class="active">Analysis</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li id="status-indicator" class="status-indicator offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Offline</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Text Analysis</h1>
+            <p>Analyze text for fraud detection and security assessment</p>
+        </div>
+
+        <!-- Analysis Form -->
+        <div class="form-section">
+            <div class="form-card">
+                <form id="analysis-form">
+                    <div class="form-group">
+                        <label for="text-input">
+                            <strong>Text to Analyze <span class="required">*</span></strong>
+                        </label>
+                        <textarea 
+                            id="text-input" 
+                            name="text_content" 
+                            placeholder="Paste text here..." 
+                            rows="6"
+                            required
+                            minlength="1"
+                            maxlength="5000"></textarea>
+                        <div class="char-count">
+                            <span id="char-counter">0</span> / 5000 characters
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mode-select">
+                            <strong>Mode</strong>
+                        </label>
+                        <select id="mode-select" name="mode">
+                            <option value="COMMAND">Automatic</option>
+                            <option value="ASK">With Confirmation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-search"></i> Analyze
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Analyzing text...</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="results-section hidden">
+            <!-- Decision -->
+            <div class="decision-card" id="decision-card">
+                <h3>Analysis Result</h3>
+                <div class="decision-content">
+                    <div class="decision-badge" id="decision-badge">
+                        <span id="decision-text">-</span>
+                    </div>
+                    <p id="decision-reason" class="decision-reason">-</p>
+                </div>
+            </div>
+
+            <!-- Fraud Score -->
+            <div class="score-card">
+                <h3>Fraud Score</h3>
+                <div class="score-content">
+                    <div class="score-display">
+                        <span id="fraud-score">0.0</span><span class="score-max">/1.0</span>
+                    </div>
+                    <div class="score-details">
+                        <p><strong>Risk Level:</strong> <span id="risk-level">-</span></p>
+                        <p><strong>Confidence:</strong> <span id="confidence">0%</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fraud Indicators -->
+            <div class="indicators-card">
+                <h3>Detected Indicators</h3>
+                <div id="indicators-list" class="indicators-list">
+                    <p class="placeholder">No indicators detected</p>
+                </div>
+            </div>
+
+            <!-- Result Actions -->
+            <div class="result-actions">
+                <button id="export-btn" class="btn btn-secondary" data-action="export">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button id="new-analysis-btn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 FinGuard | Powered by ArmorIQ</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        const AnalysisPage = {
+            currentResult: null,
+
+            init: function() {
+                this.setupEventListeners();
+                this.setupCharCounter();
+            },
+
+            setupEventListeners: function() {
+                const form = document.getElementById('analysis-form');
+                if (form) {
+                    form.addEventListener('submit', (e) => this.handleSubmit(e));
+                    form.addEventListener('reset', () => this.resetResults());
+                }
+
+                const exportBtn = document.getElementById('export-btn');
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', () => this.exportResult());
+                }
+
+                const newBtn = document.getElementById('new-analysis-btn');
+                if (newBtn) {
+                    newBtn.addEventListener('click', () => this.newAnalysis());
+                }
+            },
+
+            setupCharCounter: function() {
+                const textarea = document.getElementById('text-input');
+                const counter = document.getElementById('char-counter');
+                
+                if (textarea && counter) {
+                    textarea.addEventListener('input', () => {
+                        counter.textContent = textarea.value.length;
+                    });
+                }
+            },
+
+            handleSubmit: async function(e) {
+                e.preventDefault();
+
+                const textInput = document.getElementById('text-input');
+                const modeSelect = document.getElementById('mode-select');
+
+                // Validation
+                if (!textInput.value.trim()) {
+                    App.showNotification('Please enter text to analyze', 'warning');
+                    return;
+                }
+
+                if (textInput.value.trim().length < 10) {
+                    App.showNotification('Text must be at least 10 characters', 'warning');
+                    return;
+                }
+
+                this.showLoading(true);
+                
+                try {
+                    const result = await API.analyzeText({
+                        text_content: textInput.value.trim(),
+                        mode: modeSelect.value,
+                        metadata: { source: 'web_interface' }
+                    });
+
+                    this.displayResult(result);
+                    Utils.saveSession({
+                        text_content: textInput.value.trim(),
+                        final_decision: result.decision || result.final_decision,
+                        fraud_score: result.fraud_score,
+                        timestamp: new Date().toISOString(),
+                        result: result
+                    });
+
+                    App.showNotification('Analysis complete', 'success');
+                } catch (error) {
+                    console.error('Analysis error:', error);
+                    App.showNotification(`Analysis failed: ${error.message}`, 'error');
+                } finally {
+                    this.showLoading(false);
+                }
+            },
+
+            displayResult: function(result) {
+                const resultsSection = document.getElementById('results-section');
+                if (!resultsSection) return;
+
+                this.currentResult = result;
+
+                // Decision
+                const decision = result.decision || result.final_decision || 'UNKNOWN';
+                const decisionBadge = document.getElementById('decision-badge');
+                if (decisionBadge) {
+                    decisionBadge.className = `decision-badge ${decision.toLowerCase().replace(/_/g, '-')}`;
+                    document.getElementById('decision-text').textContent = decision.replace(/_/g, ' ');
+                }
+
+                // Reason
+                const reason = result.reason || result.explanation || '-';
+                document.getElementById('decision-reason').textContent = reason;
+
+                // Fraud Score
+                const fraudScore = parseFloat(result.fraud_score) || 0;
+                document.getElementById('fraud-score').textContent = fraudScore.toFixed(1);
+
+                // Risk Level
+                let riskLevel = 'Unknown';
+                if (fraudScore < 0.3) riskLevel = 'Low';
+                else if (fraudScore < 0.6) riskLevel = 'Medium';
+                else if (fraudScore < 0.8) riskLevel = 'High';
+                else riskLevel = 'Critical';
+                document.getElementById('risk-level').textContent = riskLevel;
+
+                // Confidence
+                const confidence = parseFloat(result.confidence) || 0;
+                document.getElementById('confidence').textContent = (confidence * 100).toFixed(0) + '%';
+
+                // Indicators
+                this.displayIndicators(result.fraud_indicators || []);
+
+                // Show results section
+                resultsSection.classList.remove('hidden');
+            },
+
+            displayIndicators: function(indicators) {
+                const list = document.getElementById('indicators-list');
+                if (!list) return;
+
+                if (!indicators || indicators.length === 0) {
+                    list.innerHTML = '<p class="placeholder">No indicators detected</p>';
+                    return;
+                }
+
+                list.innerHTML = indicators.map(indicator => `
+                    <div class="indicator-item">
+                        <i class="fas fa-flag"></i>
+                        <span>${indicator.category || 'Unknown'}</span>
+                        <small>${indicator.description || ''}</small>
+                    </div>
+                `).join('');
+            },
+
+            exportResult: function() {
+                if (!this.currentResult) {
+                    App.showNotification('No result to export', 'warning');
+                    return;
+                }
+
+                try {
+                    const json = JSON.stringify(this.currentResult, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `analysis_${Date.now()}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    App.showNotification('Report exported', 'success', 2000);
+                } catch (error) {
+                    console.error('Export error:', error);
+                    App.showNotification('Export failed', 'error');
+                }
+            },
+
+            newAnalysis: function() {
+                document.getElementById('analysis-form').reset();
+                this.resetResults();
+                document.getElementById('text-input').focus();
+            },
+
+            resetResults: function() {
+                const resultsSection = document.getElementById('results-section');
+                if (resultsSection) {
+                    resultsSection.classList.add('hidden');
+                }
+                this.currentResult = null;
+            },
+
+            showLoading: function(show) {
+                const overlay = document.getElementById('loading-overlay');
+                const btn = document.getElementById('submit-btn');
+                
+                if (overlay) {
+                    if (show) {
+                        overlay.classList.remove('hidden');
+                        App.setButtonLoading(btn, true);
+                    } else {
+                        overlay.classList.add('hidden');
+                        App.setButtonLoading(btn, false);
+                    }
+                }
+            }
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            AnalysisPage.init();
+        });
+    </script>
+</body>
+</html>

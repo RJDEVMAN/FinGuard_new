@@ -1,0 +1,35 @@
+{
+  "session_id": "SESSION_20260224151534161717",
+  "timestamp": "2026-02-24T15:15:34.161681",
+  "mode": "COMMAND",
+  "media_type": "text",
+  "agent_reports": {
+    "fraud_agent": {
+      "agent": "FraudAgent",
+      "decision": "CHECK-REQUIRED",
+      "error": "MCP invocation failed: Status 400"
+    },
+    "memory_agent": {
+      "agent": "MemoryUpdateAgent",
+      "consolidation_status": "FAILED",
+      "error": "MCP invocation failed: Status 400"
+    }
+  },
+  "audit_trail": [],
+  "blocked_actions": [],
+  "errors": [
+    {
+      "timestamp": "2026-02-24T15:15:38.407780",
+      "agent": "FraudAgent",
+      "error_type": "ANALYSIS_FAILED",
+      "error_message": "MCP invocation failed: Status 400"
+    },
+    {
+      "timestamp": "2026-02-24T15:15:43.228009",
+      "agent": "MemoryUpdateAgent",
+      "error_type": "FINALIZATION_FAILED",
+      "error_message": "MCP invocation failed: Status 400"
+    }
+  ],
+  "final_decision": "REQUIRE_MANUAL_REVIEW"
+}

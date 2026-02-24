@@ -37,3 +37,169 @@ Memory Update and Audit Trail Finalization
 2026-02-24 13:06:27,010 - MemoryUpdateAgent - ERROR - Action invocation failed: MCP invocation failed: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
 2026-02-24 13:06:27,010 - root - ERROR - [MemoryUpdateAgent] FINALIZATION_FAILED: MCP invocation failed: 'charmap' codec can't encode character '\ufffd' in position 2: character maps to <undefined>
 2026-02-24 13:06:27,010 - FinGuardOrchestrator - INFO - FinGuard analysis complete. Final Decision: REQUIRE_MANUAL_REVIEW
+2026-02-24 15:12:57,851 - httpx - INFO - HTTP Request: GET http://testserver/health "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,863 - httpx - INFO - HTTP Request: GET http://testserver/info "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,875 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:12:57,887 - httpx - INFO - HTTP Request: POST http://testserver/analyze/text "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,895 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:12:57,898 - httpx - INFO - HTTP Request: POST http://testserver/analyze/text "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,907 - app.routes.analysis - INFO - Processing image analysis request
+2026-02-24 15:12:57,910 - httpx - INFO - HTTP Request: POST http://testserver/analyze/image "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,920 - app.routes.analysis - INFO - Processing video analysis request
+2026-02-24 15:12:57,923 - httpx - INFO - HTTP Request: POST http://testserver/analyze/video "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,931 - app.routes.analysis - INFO - Processing audio analysis request
+2026-02-24 15:12:57,934 - httpx - INFO - HTTP Request: POST http://testserver/analyze/audio "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,944 - app.routes.analysis - INFO - Processing document analysis request
+2026-02-24 15:12:57,948 - httpx - INFO - HTTP Request: POST http://testserver/analyze/document "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,956 - app.routes.batch - INFO - Processing batch analysis with 3 items
+2026-02-24 15:12:57,959 - httpx - INFO - HTTP Request: POST http://testserver/analyze/batch "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,968 - app.routes.batch - INFO - Processing custom analysis request
+2026-02-24 15:12:57,972 - httpx - INFO - HTTP Request: POST http://testserver/analyze/custom "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,979 - app.routes.reports - INFO - Fetching report for session: SESSION_123
+2026-02-24 15:12:57,982 - httpx - INFO - HTTP Request: GET http://testserver/report/SESSION_123 "HTTP/1.1 200 OK"
+2026-02-24 15:12:57,991 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:12:57,994 - httpx - INFO - HTTP Request: POST http://testserver/analyze/text "HTTP/1.1 200 OK"
+2026-02-24 15:12:58,002 - httpx - INFO - HTTP Request: GET http://testserver/info "HTTP/1.1 200 OK"
+2026-02-24 15:12:58,009 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:12:58,012 - httpx - INFO - HTTP Request: POST http://testserver/analyze/text "HTTP/1.1 200 OK"
+2026-02-24 15:12:58,019 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:12:58,021 - app.routes.analysis - ERROR - Text analysis error: Orchestrator error
+2026-02-24 15:12:58,025 - httpx - INFO - HTTP Request: POST http://testserver/analyze/text "HTTP/1.1 500 Internal Server Error"
+2026-02-24 15:12:58,033 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:12:58,036 - httpx - INFO - HTTP Request: POST http://testserver/analyze/text "HTTP/1.1 200 OK"
+2026-02-24 15:13:42,663 - FinGuardOrchestrator - INFO - Starting FinGuard analysis - Session: SESSION_20260224151342663273
+2026-02-24 15:13:42,663 - FinGuardOrchestrator - INFO - Mode: COMMAND, Media Type: text
+2026-02-24 15:13:42,663 - FinGuardOrchestrator - INFO - === STAGE 1: Fraud Analysis ===
+2026-02-24 15:13:42,664 - FraudAgent - INFO - Starting fraud analysis for text
+2026-02-24 15:13:42,664 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Fraud Detection Analysis for FinGuard
+Input Type:...
+2026-02-24 15:13:42,664 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:13:42,664 - FraudAgent - INFO - Plan captured successfully
+2026-02-24 15:13:42,664 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:13:44,738 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:13:44,739 - armoriq_sdk.client - INFO - Intent token issued: id=056ef1ecd88a4f2aafc266401166045e, plan_hash=cc4505bb28887096..., expires=3600.0s
+2026-02-24 15:13:44,740 - FraudAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:13:44,740 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=fraud-mcp, action=detect_deepfakes
+2026-02-24 15:13:46,714 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:13:46,716 - FraudAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:13:46,716 - root - ERROR - [FraudAgent] ANALYSIS_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:13:46,717 - FinGuardOrchestrator - INFO - === STAGE 4: Audit Trail Finalization ===
+2026-02-24 15:13:46,717 - MemoryUpdateAgent - INFO - Starting memory update and audit trail finalization
+2026-02-24 15:13:46,717 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Memory Update and Audit Trail Finalization
+======...
+2026-02-24 15:13:46,717 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:13:46,717 - MemoryUpdateAgent - INFO - Plan captured successfully
+2026-02-24 15:13:46,717 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:13:47,421 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:13:47,455 - armoriq_sdk.client - INFO - Intent token issued: id=560fd65cead64283b8aa299ab89f5668, plan_hash=fd83ffaccc7371af..., expires=3600.0s
+2026-02-24 15:13:47,455 - MemoryUpdateAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:13:47,455 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=memory-mcp, action=consolidate_findings
+2026-02-24 15:13:48,694 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:13:48,696 - MemoryUpdateAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:13:48,696 - root - ERROR - [MemoryUpdateAgent] FINALIZATION_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:13:48,696 - FinGuardOrchestrator - INFO - FinGuard analysis complete. Final Decision: REQUIRE_MANUAL_REVIEW
+2026-02-24 15:15:34,161 - FinGuardOrchestrator - INFO - Starting FinGuard analysis - Session: SESSION_20260224151534161717
+2026-02-24 15:15:34,162 - FinGuardOrchestrator - INFO - Mode: COMMAND, Media Type: text
+2026-02-24 15:15:34,162 - FinGuardOrchestrator - INFO - === STAGE 1: Fraud Analysis ===
+2026-02-24 15:15:34,162 - FraudAgent - INFO - Starting fraud analysis for text
+2026-02-24 15:15:34,162 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Fraud Detection Analysis for FinGuard
+Input Type:...
+2026-02-24 15:15:34,163 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:15:34,163 - FraudAgent - INFO - Plan captured successfully
+2026-02-24 15:15:34,163 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:15:35,537 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:15:35,539 - armoriq_sdk.client - INFO - Intent token issued: id=59eb57643aa642239fe8888f0869d37b, plan_hash=cc4505bb28887096..., expires=3600.0s
+2026-02-24 15:15:35,539 - FraudAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:15:35,539 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=fraud-mcp, action=detect_deepfakes
+2026-02-24 15:15:38,404 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:15:38,407 - FraudAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:15:38,407 - root - ERROR - [FraudAgent] ANALYSIS_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:15:38,407 - FinGuardOrchestrator - INFO - === STAGE 4: Audit Trail Finalization ===
+2026-02-24 15:15:38,408 - MemoryUpdateAgent - INFO - Starting memory update and audit trail finalization
+2026-02-24 15:15:38,408 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Memory Update and Audit Trail Finalization
+======...
+2026-02-24 15:15:38,408 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:15:38,408 - MemoryUpdateAgent - INFO - Plan captured successfully
+2026-02-24 15:15:38,408 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:15:41,370 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:15:41,373 - armoriq_sdk.client - INFO - Intent token issued: id=7b18202ff0c64b2b9833047ecff74bf8, plan_hash=b5aa1ae2d4c084bc..., expires=3600.0s
+2026-02-24 15:15:41,373 - MemoryUpdateAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:15:41,374 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=memory-mcp, action=consolidate_findings
+2026-02-24 15:15:43,226 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:15:43,227 - MemoryUpdateAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:15:43,228 - root - ERROR - [MemoryUpdateAgent] FINALIZATION_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:15:43,228 - FinGuardOrchestrator - INFO - FinGuard analysis complete. Final Decision: REQUIRE_MANUAL_REVIEW
+2026-02-24 15:35:01,718 - fastapi_endpoint - INFO - FinGuard FastAPI application started
+2026-02-24 15:35:46,083 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:35:46,083 - FinGuardOrchestrator - INFO - Starting FinGuard analysis - Session: SESSION_20260224153546083506
+2026-02-24 15:35:46,083 - FinGuardOrchestrator - INFO - Mode: COMMAND, Media Type: text
+2026-02-24 15:35:46,084 - FinGuardOrchestrator - INFO - === STAGE 1: Fraud Analysis ===
+2026-02-24 15:35:46,084 - FraudAgent - INFO - Starting fraud analysis for text
+2026-02-24 15:35:46,084 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Fraud Detection Analysis for FinGuard
+Input Type:...
+2026-02-24 15:35:46,084 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:35:46,084 - FraudAgent - INFO - Plan captured successfully
+2026-02-24 15:35:46,085 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:35:47,473 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:35:47,474 - armoriq_sdk.client - INFO - Intent token issued: id=621060e1d5ce4470979189f13feea515, plan_hash=cc4505bb28887096..., expires=3600.0s
+2026-02-24 15:35:47,475 - FraudAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:35:47,475 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=fraud-mcp, action=detect_deepfakes
+2026-02-24 15:35:49,316 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:35:49,317 - FraudAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:35:49,318 - root - ERROR - [FraudAgent] ANALYSIS_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:35:49,318 - FinGuardOrchestrator - INFO - === STAGE 4: Audit Trail Finalization ===
+2026-02-24 15:35:49,318 - MemoryUpdateAgent - INFO - Starting memory update and audit trail finalization
+2026-02-24 15:35:49,318 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Memory Update and Audit Trail Finalization
+======...
+2026-02-24 15:35:49,319 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:35:49,319 - MemoryUpdateAgent - INFO - Plan captured successfully
+2026-02-24 15:35:49,319 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:35:50,340 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:35:50,343 - armoriq_sdk.client - INFO - Intent token issued: id=4a6db74d02df4692b6939430ef8d7e4d, plan_hash=2b185b30a22ab398..., expires=3600.0s
+2026-02-24 15:35:50,343 - MemoryUpdateAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:35:50,343 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=memory-mcp, action=consolidate_findings
+2026-02-24 15:35:51,467 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:35:51,468 - MemoryUpdateAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:35:51,469 - root - ERROR - [MemoryUpdateAgent] FINALIZATION_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:35:51,469 - FinGuardOrchestrator - INFO - FinGuard analysis complete. Final Decision: REQUIRE_MANUAL_REVIEW
+2026-02-24 15:37:33,516 - fastapi_endpoint - INFO - FinGuard FastAPI application shutdown
+2026-02-24 15:47:19,155 - app.routes.analysis - INFO - Processing text analysis request - Mode: COMMAND
+2026-02-24 15:47:19,156 - FinGuardOrchestrator - INFO - Starting FinGuard analysis - Session: SESSION_20260224154719156234
+2026-02-24 15:47:19,156 - FinGuardOrchestrator - INFO - Mode: COMMAND, Media Type: text
+2026-02-24 15:47:19,156 - FinGuardOrchestrator - INFO - === STAGE 1: Fraud Analysis ===
+2026-02-24 15:47:19,156 - FraudAgent - INFO - Starting fraud analysis for text
+2026-02-24 15:47:19,157 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Fraud Detection Analysis for FinGuard
+Input Type:...
+2026-02-24 15:47:19,157 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:47:19,157 - FraudAgent - INFO - Plan captured successfully
+2026-02-24 15:47:19,157 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:47:20,842 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:47:20,843 - armoriq_sdk.client - INFO - Intent token issued: id=c4020168aaca4af583ec31ffb7771dd8, plan_hash=cc4505bb28887096..., expires=3600.0s
+2026-02-24 15:47:20,843 - FraudAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:47:20,843 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=fraud-mcp, action=detect_deepfakes
+2026-02-24 15:47:22,454 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:47:22,456 - FraudAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:47:22,456 - root - ERROR - [FraudAgent] ANALYSIS_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:47:22,456 - FinGuardOrchestrator - INFO - === STAGE 4: Audit Trail Finalization ===
+2026-02-24 15:47:22,456 - MemoryUpdateAgent - INFO - Starting memory update and audit trail finalization
+2026-02-24 15:47:22,456 - armoriq_sdk.client - INFO - Capturing plan: llm=gpt-4, prompt=
+Memory Update and Audit Trail Finalization
+======...
+2026-02-24 15:47:22,457 - armoriq_sdk.client - INFO - Plan captured with 2 steps
+2026-02-24 15:47:22,457 - MemoryUpdateAgent - INFO - Plan captured successfully
+2026-02-24 15:47:22,457 - armoriq_sdk.client - INFO - Requesting intent token for plan with 2 steps
+2026-02-24 15:47:23,218 - httpx - INFO - HTTP Request: POST https://customer-api.armoriq.ai/iap/sdk/token "HTTP/1.1 200 OK"
+2026-02-24 15:47:23,222 - armoriq_sdk.client - INFO - Intent token issued: id=a8ec9033cea54ee79e17730465a8031e, plan_hash=aebabf84b295a18c..., expires=3600.0s
+2026-02-24 15:47:23,222 - MemoryUpdateAgent - INFO - Intent token generated with policy enforcement
+2026-02-24 15:47:23,222 - armoriq_sdk.client - INFO - Invoking MCP action: mcp=memory-mcp, action=consolidate_findings
+2026-02-24 15:47:24,630 - httpx - INFO - HTTP Request: POST https://customer-proxy.armoriq.ai/invoke "HTTP/1.1 400 Bad Request"
+2026-02-24 15:47:24,631 - MemoryUpdateAgent - ERROR - Action invocation failed: MCP invocation failed: Status 400
+2026-02-24 15:47:24,631 - root - ERROR - [MemoryUpdateAgent] FINALIZATION_FAILED: MCP invocation failed: Status 400
+2026-02-24 15:47:24,631 - FinGuardOrchestrator - INFO - FinGuard analysis complete. Final Decision: REQUIRE_MANUAL_REVIEW

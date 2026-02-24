@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard - Security Analysis System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>FinGuard</span>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="index.html" class="active">Dashboard</a></li>
+                <li><a href="analysis.html">Analysis</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li id="status-indicator" class="status-indicator offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Offline</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>FinGuard Dashboard</h1>
+            <p>Multi-Agent Security Analysis System</p>
+        </div>
+
+        <!-- System Status -->
+        <div class="status-section">
+            <h2>System Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-icon" id="api-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="status-content">
+                        <h3>FastAPI Backend</h3>
+                        <p id="api-status-text">Checking...</p>
+                    </div>
+                </div>
+
+                <div class="status-item">
+                    <div class="status-icon" id="gateway-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="status-content">
+                        <h3>MCP Gateway</h3>
+                        <p id="gateway-status-text">Checking...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-grid">
+                <a href="analysis.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Analyze Text</h3>
+                    <p>Check text for fraud indicators</p>
+                </a>
+
+                <a href="reports.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>View Reports</h3>
+                    <p>Browse analysis history</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Results -->
+        <div class="recent-section">
+            <h2>Recent Analysis</h2>
+            <div id="recent-results" class="results-container">
+                <p class="placeholder">No analysis yet. Start analyzing content.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 FinGuard | Powered by ArmorIQ</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Dashboard initialization
+        document.addEventListener('DOMContentLoaded', async function() {
+            const apiOnline = await API.checkHealth();
+            updateApiStatus(apiOnline);
+
+            const gatewayOnline = await API.checkGatewayHealth();
+            updateGatewayStatus(gatewayOnline);
+
+            loadRecentResults();
+        });
+
+        function updateApiStatus(online) {
+            const icon = document.getElementById('api-icon');
+            const text = document.getElementById('api-status-text');
+            
+            if (icon) {
+                if (online) {
+                    icon.classList.add('success');
+                    text.textContent = 'Healthy';
+                } else {
+                    icon.classList.add('error');
+                    text.textContent = 'Unavailable';
+                }
+            }
+        }
+
+        function updateGatewayStatus(online) {
+            const icon = document.getElementById('gateway-icon');
+            const text = document.getElementById('gateway-status-text');
+            
+            if (icon) {
+                if (online) {
+                    icon.classList.add('success');
+                    text.textContent = 'Healthy';
+                } else {
+                    icon.classList.add('error');
+                    text.textContent = 'Unavailable';
+                }
+            }
+        }
+
+        function loadRecentResults() {
+            const container = document.getElementById('recent-results');
+            const sessions = Utils.getRecentSessions(3);
+
+            if (sessions.length === 0) {
+                container.innerHTML = '<p class="placeholder">No analysis yet. Start analyzing content.</p>';
+                return;
+            }
+
+            container.innerHTML = sessions.map(session => `
+                <div class="result-card">
+                    <div class="result-header">
+                        <span class="session-time">${Utils.formatDateTime(session.timestamp)}</span>
+                        <span class="decision-badge ${getDecisionClass(session.final_decision || session.decision)}">${(session.final_decision || session.decision || 'UNKNOWN').replace(/_/g, ' ')}</span>
+                    </div>
+                    <p class="result-text">${(session.text_content || '').substring(0, 100)}...</p>
+                </div>
+            `).join('');
+        }
+
+        function getDecisionClass(decision) {
+            if (!decision) return 'unknown';
+            return decision.toLowerCase().replace(/_/g, '-');
+        }
+    </script>
+</body>
+</html>

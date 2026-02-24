@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Analysis - FinGuard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>FinGuard</span>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="analysis.html">Text Analysis</a></li>
+                <li><a href="media-analysis.html" class="active">Media Analysis</a></li>
+                <li><a href="batch-analysis.html">Batch Processing</a></li>
+                <li><a href="reports.html">Reports</a></li>
+                <li id="status-indicator" class="status-indicator offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Offline</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Media Analysis</h1>
+            <p>Analyze images, videos, audio files, and documents for fraud detection</p>
+        </div>
+
+        <!-- Media Type Selector -->
+        <div class="media-type-selector">
+            <div class="type-tabs">
+                <button class="type-tab active" data-type="image">
+                    <i class="fas fa-image"></i> Image
+                </button>
+                <button class="type-tab" data-type="video">
+                    <i class="fas fa-video"></i> Video
+                </button>
+                <button class="type-tab" data-type="audio">
+                    <i class="fas fa-volume-up"></i> Audio
+                </button>
+                <button class="type-tab" data-type="document">
+                    <i class="fas fa-file-pdf"></i> Document
+                </button>
+            </div>
+        </div>
+
+        <!-- Analysis Form -->
+        <div class="analysis-form-wrapper">
+            <div class="form-card">
+                <form id="media-form">
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label for="file-input">
+                            <strong>Select File</strong>
+                            <span class="required">*</span>
+                        </label>
+                        <div class="file-upload-area" id="file-upload-area">
+                            <input 
+                                type="file" 
+                                id="file-input" 
+                                name="file" 
+                                accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+                                hidden
+                                required
+                            >
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag and drop your file here, or click to select</p>
+                                <small>Supported: Images, Videos, Audio, Documents</small>
+                            </div>
+                            <div id="file-preview" class="file-preview hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- File Info -->
+                    <div id="file-info" class="file-info-panel hidden">
+                        <div class="info-row">
+                            <span class="label">File Name:</span>
+                            <span id="file-name" class="value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">File Size:</span>
+                            <span id="file-size" class="value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Media Type:</span>
+                            <span id="media-type-display" class="value">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="form-group">
+                        <label for="media-metadata">
+                            <strong>Additional Metadata (Optional)</strong>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="media-metadata" 
+                            name="metadata" 
+                            placeholder="e.g., source=upload, priority=high"
+                        >
+                    </div>
+
+                    <!-- Mode Selection -->
+                    <div class="form-group">
+                        <label for="media-mode">
+                            <strong>Execution Mode</strong>
+                        </label>
+                        <select id="media-mode" name="mode">
+                            <option value="COMMAND">Command (Automatic)</option>
+                            <option value="ASK">Ask (With Confirmation)</option>
+                        </select>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="submit-media-btn" disabled>
+                            <i class="fas fa-search"></i> Analyze Media
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="media-loading" class="loading-overlay hidden">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Analyzing media...</p>
+                <div class="progress-bar">
+                    <div id="media-progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="media-results" class="results-section hidden">
+            <!-- Session Header -->
+            <div class="session-header">
+                <div class="session-info">
+                    <h2>Media Analysis Results</h2>
+                    <p>Session ID: <code id="media-session-id">-</code></p>
+                </div>
+            </div>
+
+            <!-- Decision -->
+            <div class="decision-card" id="media-decision-card">
+                <div class="decision-header">
+                    <h3>Analysis Decision</h3>
+                </div>
+                <div class="decision-content">
+                    <div class="decision-badge" id="media-decision-badge">
+                        <span id="media-decision-text">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Preview -->
+            <div id="media-preview-section" class="media-preview-card hidden">
+                <h3>Media Preview</h3>
+                <div id="media-preview-container" class="media-preview-container"></div>
+            </div>
+
+            <!-- Analysis Details -->
+            <div class="analysis-details-card">
+                <h3>Deepfake & Authenticity Detection</h3>
+                <div id="deepfake-results" class="results-grid">
+                    <div class="result-item">
+                        <span class="label">Deepfake Detected:</span>
+                        <span class="value" id="deepfake-detected">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Confidence:</span>
+                        <span class="value" id="deepfake-confidence">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Tampering:</span>
+                        <span class="value" id="tampering-detected">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Reports -->
+            <div class="agents-container">
+                <h3>Agent Reports</h3>
+                <div class="agents-grid" id="media-agents-grid"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="result-actions">
+                <button id="media-export-btn" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+                <button id="media-new-btn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Analyze Another
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="media-error" class="error-message hidden">
+            <div class="error-content">
+                <i class="fas fa-exclamation-circle"></i>
+                <p id="media-error-text">An error occurred</p>
+                <button class="btn btn-small" onclick="document.getElementById('media-error').classList.add('hidden')">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 FinGuard. All rights reserved.</p>
+            <p>Version 1.0.0 | Powered by ArmorIQ</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        let currentMediaType = 'image';
+        let currentFile = null;
+
+        // Media type tabs
+        document.querySelectorAll('.type-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentMediaType = this.dataset.type;
+                document.getElementById('file-input').accept = getFileAccept(currentMediaType);
+                document.getElementById('file-input').value = '';
+                document.getElementById('file-preview').classList.add('hidden');
+                document.getElementById('file-info').classList.add('hidden');
+                document.getElementById('submit-media-btn').disabled = true;
+                currentFile = null;
+            });
+        });
+
+        function getFileAccept(type) {
+            const accepts = {
+                'image': 'image/*',
+                'video': 'video/*',
+                'audio': 'audio/*',
+                'document': '.pdf,.doc,.docx,.txt'
+            };
+            return accepts[type] || '*/*';
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('file-upload-area');
+        const fileInput = document.getElementById('file-input');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Validate file size (max 100MB)
+            const maxSize = 100 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showMediaError('File size exceeds 100MB limit');
+                fileInput.value = '';
+                return;
+            }
+
+            currentFile = file;
+
+            // Display file info
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-size').textContent = Utils.formatFileSize(file.size);
+            document.getElementById('media-type-display').textContent = file.type || 'Unknown';
+            document.getElementById('file-info').classList.remove('hidden');
+
+            // Show preview for images
+            if (currentMediaType === 'image' && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById('file-preview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            document.getElementById('submit-media-btn').disabled = false;
+        }
+
+        // Form submission
+        document.getElementById('media-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentFile) {
+                showMediaError('Please select a file');
+                return;
+            }
+
+            try {
+                showMediaLoading(true);
+                document.getElementById('media-results').classList.add('hidden');
+
+                // Convert file to base64
+                const base64 = await Utils.fileToBase64(currentFile);
+                
+                // Prepare metadata
+                const metadataStr = document.getElementById('media-metadata').value;
+                const metadata = Utils.parseMetadata(metadataStr);
+
+                // Call appropriate API based on media type
+                let result;
+                const commonParams = {
+                    file: base64,
+                    mode: document.getElementById('media-mode').value,
+                    metadata: metadata
+                };
+
+                switch(currentMediaType) {
+                    case 'image':
+                        result = await API.analyzeImage({ ...commonParams, filename: currentFile.name });
+                        break;
+                    case 'video':
+                        result = await API.analyzeVideo({ ...commonParams, filename: currentFile.name });
+                        break;
+                    case 'audio':
+                        result = await API.analyzeAudio({ ...commonParams, filename: currentFile.name });
+                        break;
+                    case 'document':
+                        result = await API.analyzeDocument({ ...commonParams, filename: currentFile.name });
+                        break;
+                }
+
+                if (result && result.session_id) {
+                    Utils.saveSession(result);
+                    displayMediaResults(result);
+                    showMediaLoading(false);
+                    document.getElementById('media-results').classList.remove('hidden');
+                } else {
+                    showMediaError('Invalid response from server');
+                    showMediaLoading(false);
+                }
+            } catch (error) {
+                console.error('Media analysis error:', error);
+                showMediaError(error.message || 'Failed to analyze media');
+                showMediaLoading(false);
+            }
+        });
+
+        function displayMediaResults(data) {
+            document.getElementById('media-session-id').textContent = data.session_id;
+
+            // Decision
+            const decisionBadge = document.getElementById('media-decision-badge');
+            const decisionText = document.getElementById('media-decision-text');
+            decisionText.textContent = data.final_decision || 'UNKNOWN';
+            decisionBadge.className = 'decision-badge ' + (data.final_decision ? data.final_decision.toLowerCase().replace(/_/g, '-') : '');
+
+            // Deepfake analysis
+            const fraudAgent = data.agent_reports?.fraud_agent;
+            if (fraudAgent && fraudAgent.detection_data) {
+                const data_info = fraudAgent.detection_data;
+                document.getElementById('deepfake-detected').textContent = 
+                    data_info.deepfake_detected ? 'Yes' : 'No';
+                document.getElementById('deepfake-confidence').textContent = 
+                    Math.round((data_info.confidence || 0) * 100) + '%';
+                document.getElementById('tampering-detected').textContent = 
+                    (data_info.tampering_indicators?.length || 0) > 0 ? 'Detected' : 'None';
+            }
+
+            // Agent reports
+            displayMediaAgentReports(data.agent_reports);
+        }
+
+        function displayMediaAgentReports(reports) {
+            const grid = document.getElementById('media-agents-grid');
+            grid.innerHTML = '';
+
+            if (!reports) return;
+
+            Object.entries(reports).forEach(([key, agent]) => {
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                const statusClass = agent.decision === 'SAFE' ? 'success' : 'warning';
+                card.innerHTML = `
+                    <div class="agent-header">
+                        <h4>${agent.agent || key}</h4>
+                        <span class="agent-status ${statusClass}">${agent.decision || 'PENDING'}</span>
+                    </div>
+                    <div class="agent-info">
+                        <p><strong>Status:</strong> ${agent.status || 'Complete'}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showMediaError(message) {
+            const errorDiv = document.getElementById('media-error');
+            document.getElementById('media-error-text').textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function showMediaLoading(show) {
+            const overlay = document.getElementById('media-loading');
+            if (show) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('media-export-btn').addEventListener('click', function() {
+            const sessionId = document.getElementById('media-session-id').textContent;
+            const content = document.getElementById('media-results').innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `media_analysis_${sessionId}.txt`;
+            a.click();
+        });
+
+        document.getElementById('media-new-btn').addEventListener('click', function() {
+            document.getElementById('media-form').reset();
+            document.getElementById('media-results').classList.add('hidden');
+            currentFile = null;
+            document.getElementById('submit-media-btn').disabled = true;
+            document.getElementById('file-info').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

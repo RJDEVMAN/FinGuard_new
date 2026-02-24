@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-02-24",
+  "summary": "FastAPI backend fully operational, CLI blocked by external MCP unavailability",
+  "fastapi_backend": {
+    "status": "WORKING",
+    "tests_passed": 16,
+    "tests_total": 16,
+    "endpoints": [
+      "/health",
+      "/info",
+      "/analyze/text",
+      "/analyze/image",
+      "/analyze/video",
+      "/analyze/audio",
+      "/analyze/document",
+      "/analyze/batch",
+      "/analyze/custom",
+      "/report/{session_id}"
+    ]
+  },
+  "cli_workflow": {
+    "status": "BLOCKED",
+    "failure_point": "MCP server invocation",
+    "missing_services": [
+      "fraud-mcp",
+      "memory-mcp"
+    ],
+    "api_status": "ACCESSIBLE (token generation works)",
+    "reason": "External MCP servers not deployed or not accessible"
+  },
+  "recommendations": [
+    "Use FastAPI backend for all development/testing",
+    "Verify ArmorIQ MCP server deployment status",
+    "Check API credentials and permissions",
+    "Consider local mock implementations for development"
+  ]
+}

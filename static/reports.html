@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - FinGuard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>FinGuard</span>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="analysis.html">Text Analysis</a></li>
+                <li><a href="media-analysis.html">Media Analysis</a></li>
+                <li><a href="batch-analysis.html">Batch Processing</a></li>
+                <li><a href="reports.html" class="active">Reports</a></li>
+                <li id="status-indicator" class="status-indicator offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Offline</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Analysis Reports</h1>
+            <p>View and manage your analysis history</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <div class="filter-group">
+                <label for="filter-decision">Filter by Decision:</label>
+                <select id="filter-decision">
+                    <option value="">All Decisions</option>
+                    <option value="SAFE_APPROVED">Safe Approved</option>
+                    <option value="REQUIRE_MANUAL_REVIEW">Require Manual Review</option>
+                    <option value="FRAUD_BLOCKED">Fraud Blocked</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filter-type">Filter by Type:</label>
+                <select id="filter-type">
+                    <option value="">All Types</option>
+                    <option value="text">Text Analysis</option>
+                    <option value="image">Image Analysis</option>
+                    <option value="video">Video Analysis</option>
+                    <option value="audio">Audio Analysis</option>
+                    <option value="document">Document Analysis</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="sort-by">Sort by:</label>
+                <select id="sort-by">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="decision">Decision</option>
+                </select>
+            </div>
+
+            <button id="apply-filters-btn" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Apply Filters
+            </button>
+            <button id="clear-filters-btn" class="btn btn-secondary">
+                <i class="fas fa-redo"></i> Clear Filters
+            </button>
+        </div>
+
+        <!-- Sessions List -->
+        <div class="reports-section">
+            <h2>Analysis Sessions</h2>
+            <div id="sessions-list" class="sessions-list">
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No analysis sessions yet. Run an analysis to see reports here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prev-btn" class="btn btn-secondary">Previous</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-btn" class="btn btn-secondary">Next</button>
+        </div>
+
+        <!-- Session Detail Modal -->
+        <div id="detail-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Analysis Report</h2>
+                    <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+                </div>
+                <div id="detail-body" class="modal-body">
+                    <!-- Will be populated -->
+                </div>
+                <div class="modal-footer">
+                    <button id="export-report-btn" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                    <button id="delete-session-btn" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Session
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeDetailModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="reports-error" class="error-message hidden">
+            <div class="error-content">
+                <i class="fas fa-exclamation-circle"></i>
+                <p id="reports-error-text">An error occurred</p>
+                <button class="btn btn-small" onclick="document.getElementById('reports-error').classList.add('hidden')">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 FinGuard. All rights reserved.</p>
+            <p>Version 1.0.0 | Powered by ArmorIQ</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        const ITEMS_PER_PAGE = 10;
+        let allSessions = [];
+        let filteredSessions = [];
+        let currentPage = 1;
+        let currentDetailSession = null;
+
+        function loadSessions() {
+            try {
+                allSessions = Utils.getRecentSessions(1000) || [];
+                applyFilters();
+                displaySessions();
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                showError('Failed to load sessions');
+            }
+        }
+
+        function applyFilters() {
+            const decisionFilter = document.getElementById('filter-decision').value;
+            const typeFilter = document.getElementById('filter-type').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            filteredSessions = allSessions.filter(session => {
+                if (decisionFilter && session.decision !== decisionFilter) return false;
+                if (typeFilter && session.type !== typeFilter) return false;
+                return true;
+            });
+
+            // Sort
+            if (sortBy === 'date-desc') {
+                filteredSessions.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+            } else if (sortBy === 'date-asc') {
+                filteredSessions.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+            } else if (sortBy === 'decision') {
+                filteredSessions.sort((a, b) => (a.decision || '').localeCompare(b.decision || ''));
+            }
+
+            currentPage = 1;
+        }
+
+        function displaySessions() {
+            const list = document.getElementById('sessions-list');
+            const pagination = document.getElementById('pagination');
+
+            if (filteredSessions.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No sessions match your filters.</p>
+                    </div>
+                `;
+                pagination.style.display = 'none';
+                return;
+            }
+
+            const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIdx = startIdx + ITEMS_PER_PAGE;
+            const pageItems = filteredSessions.slice(startIdx, endIdx);
+
+            list.innerHTML = pageItems.map((session, idx) => `
+                <div class="session-card" onclick="showDetailModal(${startIdx + idx})">
+                    <div class="session-header">
+                        <h3>${session.type ? session.type.toUpperCase() : 'ANALYSIS'}</h3>
+                        <span class="decision-badge ${(session.decision || 'unknown').toLowerCase().replace(/_/g, '-')}">
+                            ${session.decision || 'UNKNOWN'}
+                        </span>
+                    </div>
+                    <div class="session-preview">
+                        <p>${(session.input || 'No content').substring(0, 100)}${(session.input || '').length > 100 ? '...' : ''}</p>
+                    </div>
+                    <div class="session-footer">
+                        <small>${new Date(session.timestamp || Date.now()).toLocaleString()}</small>
+                        <button class="btn btn-small" onclick="event.stopPropagation(); viewSessionDetail(${startIdx + idx})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update pagination
+            const totalPages = Math.ceil(filteredSessions.length / ITEMS_PER_PAGE);
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+                document.getElementById('prev-btn').disabled = currentPage === 1;
+                document.getElementById('next-btn').disabled = currentPage === totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+
+        function showDetailModal(index) {
+            currentDetailSession = filteredSessions[index];
+            const modal = document.getElementById('detail-modal');
+            const body = document.getElementById('detail-body');
+
+            const session = currentDetailSession;
+            
+            let html = `
+                <div class="report-detail">
+                    <div class="detail-section">
+                        <h3>Analysis Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="label">Type:</span>
+                                <span class="value">${session.type ? session.type.toUpperCase() : 'UNKNOWN'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Decision:</span>
+                                <span class="value decision-badge ${(session.decision || 'unknown').toLowerCase().replace(/_/g, '-')}">
+                                    ${session.decision || 'UNKNOWN'}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Timestamp:</span>
+                                <span class="value">${new Date(session.timestamp || Date.now()).toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Session ID:</span>
+                                <span class="value">${session.id || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Input Content</h3>
+                        <div class="input-preview">
+                            ${session.input ? `<p>${session.input}</p>` : '<p class="text-muted">No input content</p>'}
+                        </div>
+                    </div>
+            `;
+
+            // Agent scores
+            if (session.scores) {
+                html += `
+                    <div class="detail-section">
+                        <h3>Agent Scores</h3>
+                        <div class="scores-grid">
+                            ${Object.entries(session.scores).map(([agent, score]) => `
+                                <div class="score-item">
+                                    <span class="agent-name">${agent}</span>
+                                    <div class="score-bar">
+                                        <div class="score-fill" style="width: ${(score || 0) * 100}%"></div>
+                                    </div>
+                                    <span class="score-value">${(score || 0).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Agent reports
+            if (session.agent_reports && Object.keys(session.agent_reports).length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <h3>Agent Reports</h3>
+                        <div class="agent-cards">
+                            ${Object.entries(session.agent_reports).map(([agent, report]) => `
+                                <div class="agent-card">
+                                    <h4>${agent}</h4>
+                                    <p>${report || 'No report'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            body.innerHTML = html;
+            modal.classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            currentDetailSession = null;
+        }
+
+        function viewSessionDetail(index) {
+            showDetailModal(index);
+        }
+
+        document.getElementById('apply-filters-btn').addEventListener('click', function() {
+            applyFilters();
+            displaySessions();
+        });
+
+        document.getElementById('clear-filters-btn').addEventListener('click', function() {
+            document.getElementById('filter-decision').value = '';
+            document.getElementById('filter-type').value = '';
+            document.getElementById('sort-by').value = 'date-desc';
+            applyFilters();
+            displaySessions();
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                displaySessions();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', function() {
+            const totalPages = Math.ceil(filteredSessions.length / ITEMS_PER_PAGE);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displaySessions();
+            }
+        });
+
+        document.getElementById('export-report-btn').addEventListener('click', function() {
+            if (!currentDetailSession) return;
+
+            const session = currentDetailSession;
+            const reportJSON = JSON.stringify(session, null, 2);
+            const blob = new Blob([reportJSON], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report_${session.id || 'export'}.json`;
+            a.click();
+        });
+
+        document.getElementById('delete-session-btn').addEventListener('click', function() {
+            if (!currentDetailSession) return;
+
+            if (confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+                try {
+                    const sessions = Utils.getRecentSessions(1000) || [];
+                    const filtered = sessions.filter(s => s.id !== currentDetailSession.id);
+                    localStorage.setItem('analysis_sessions', JSON.stringify(filtered));
+                    closeDetailModal();
+                    loadSessions();
+                } catch (error) {
+                    showError('Failed to delete session');
+                }
+            }
+        });
+
+        function showError(message) {
+            const errorDiv = document.getElementById('reports-error');
+            document.getElementById('reports-error-text').textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', loadSessions);
+    </script>
+</body>
+</html>

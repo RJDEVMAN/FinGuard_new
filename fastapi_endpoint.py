@@ -1,12 +1,5 @@
-"""
-FinGuard FastAPI Application
-Multi-Agent Security Analysis System powered by ArmorIQ
-
-This module initializes and configures the FastAPI application with all routes,
-middleware, and exception handlers for the FinGuard security analysis system.
-"""
-
-import logging
+# Imports
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -14,10 +7,36 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.utils import setup_logger
 from app.routes import health, analysis, batch, reports
+from armor_workflow import FinGuardOrchestrator
 
 
 # Initialize logger
 logger = setup_logger(__name__)
+
+
+# Global orchestrator instance
+orchestrator = None
+
+
+def initialize_orchestrator():
+    """Initialize FinGuard orchestrator with unified MCP gateway"""
+    global orchestrator
+    try:
+        orchestrator = FinGuardOrchestrator()
+        
+        # Log MCP gateway configuration
+        mcp_gateway_url = os.getenv("MCP_GATEWAY_URL", "http://localhost:8001")
+        
+        mcp_config = {
+            "gateway_url": mcp_gateway_url,
+            "unified_endpoint": f"{mcp_gateway_url}/invoke",
+            "agents": ["fraud", "risk", "compliance", "memory"]
+        }
+        logger.info(f"✅ Orchestrator initialized with unified MCP gateway: {mcp_config}")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize orchestrator: {str(e)}", exc_info=True)
+        return False
 
 
 # Lifespan context manager for startup/shutdown events
@@ -25,10 +44,16 @@ logger = setup_logger(__name__)
 async def lifespan(app: FastAPI):
     """Handle startup and shutdown events"""
     # Startup
-    logger.info("FinGuard FastAPI application started")
+    logger.info("🚀 FinGuard FastAPI application starting...")
+    if initialize_orchestrator():
+        logger.info("✅ FinGuard orchestrator initialized successfully")
+    else:
+        logger.warning("⚠️  FinGuard orchestrator initialization encountered issues - using fallback mode")
+    
     yield
+    
     # Shutdown
-    logger.info("FinGuard FastAPI application shutdown")
+    logger.info("🛑 FinGuard FastAPI application shutting down...")
 
 
 # Create FastAPI application
@@ -70,7 +95,7 @@ async def http_exception_handler(request, exc):
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     """Handle unexpected exceptions"""
-    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    logger.error(f"❌ Unhandled exception: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"}
